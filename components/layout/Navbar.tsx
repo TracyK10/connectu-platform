@@ -1,12 +1,16 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FiHome, FiCompass, FiMessageSquare, FiBell, FiSearch } from 'react-icons/fi';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const router = useRouter();
+  const { user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +18,15 @@ const Navbar = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (!menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener('click', onDocClick);
+    return () => document.removeEventListener('click', onDocClick);
   }, []);
 
   const navItems = [
@@ -72,9 +85,18 @@ const Navbar = () => {
             </div>
           </div>
 
-          <button className="flex items-center justify-center w-9 h-9 overflow-hidden text-white bg-gray-300 rounded-full dark:bg-slate-700">
-            <span className="text-sm font-medium">U</span>
-          </button>
+          <div className="relative" ref={menuRef}>
+            <button onClick={() => setMenuOpen((o) => !o)} className="flex items-center justify-center w-9 h-9 overflow-hidden text-white bg-gray-300 rounded-full dark:bg-slate-700">
+              <span className="text-sm font-medium">{user?.name?.[0]?.toUpperCase() || 'U'}</span>
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-lg overflow-hidden">
+                <button onClick={() => { setMenuOpen(false); router.push('/profile'); }} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-800">Profile</button>
+                <button onClick={() => { setMenuOpen(false); router.push('/edit-profile'); }} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-800">Edit Profile</button>
+                <button onClick={() => { setMenuOpen(false); logout(); router.push('/login'); }} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-slate-800">Log out</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

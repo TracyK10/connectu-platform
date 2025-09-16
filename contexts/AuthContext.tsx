@@ -4,6 +4,10 @@ export interface AuthUser {
 	id: string;
 	name: string;
 	email: string;
+	bio?: string;
+	location?: string;
+	website?: string;
+	avatar?: string;
 }
 
 interface AuthContextValue {
@@ -12,6 +16,7 @@ interface AuthContextValue {
 	login: (email: string, password: string) => Promise<void>;
 	signup: (name: string, email: string, password: string) => Promise<void>;
 	logout: () => void;
+	updateProfile: (updates: Partial<AuthUser>) => void;
 }
 
 const STORAGE_KEY = 'connectu_auth_user';
@@ -41,14 +46,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	};
 
 	const login = async (email: string, _password: string) => {
-		// Demo login: accept any creds and create a user
-		const u: AuthUser = { id: `u-${Date.now()}`, name: email.split('@')[0] || 'User', email };
+		const u: AuthUser = { id: `u-${Date.now()}`, name: email.split('@')[0] || 'User', email, avatar: 'https://randomuser.me/api/portraits/women/65.jpg' };
 		setUser(u);
 		persist(u);
 	};
 
 	const signup = async (name: string, email: string, _password: string) => {
-		const u: AuthUser = { id: `u-${Date.now()}`, name: name || email.split('@')[0] || 'User', email };
+		const u: AuthUser = { id: `u-${Date.now()}`, name: name || email.split('@')[0] || 'User', email, avatar: 'https://randomuser.me/api/portraits/women/65.jpg' };
 		setUser(u);
 		persist(u);
 	};
@@ -58,7 +62,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		persist(null);
 	};
 
-	const value = useMemo<AuthContextValue>(() => ({ user, initialized, login, signup, logout }), [user, initialized]);
+	const updateProfile = (updates: Partial<AuthUser>) => {
+		setUser((prev) => {
+			const next = prev ? { ...prev, ...updates } : null;
+			persist(next);
+			return next;
+		});
+	};
+
+	const value = useMemo<AuthContextValue>(() => ({ user, initialized, login, signup, logout, updateProfile }), [user, initialized]);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

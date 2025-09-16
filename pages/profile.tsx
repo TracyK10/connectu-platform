@@ -1,6 +1,9 @@
 import MainLayout from '../components/layout/MainLayout';
+import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
 export default function Profile() {
+	const { user } = useAuth();
 	const photos = [
 		'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop',
 		'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1200&auto=format&fit=crop',
@@ -18,11 +21,11 @@ export default function Profile() {
 				<div className="max-w-4xl mx-auto py-6">
 					{/* Header */}
 					<div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6 text-center">
-						<img src="https://randomuser.me/api/portraits/women/65.jpg" className="h-24 w-24 rounded-full mx-auto" alt="avatar" />
-						<h1 className="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">Sophia Bennett</h1>
-						<p className="text-sm text-gray-600 dark:text-gray-400">Digital Artist | Nature Enthusiast | Coffee Lover</p>
-						<p className="mt-1 text-sm text-gray-500">1,234 followers · 567 following</p>
-						<button className="mt-4 h-10 px-4 rounded-xl bg-gray-100 dark:bg-slate-800 text-sm font-medium text-gray-700 dark:text-gray-200">Edit Profile</button>
+						<img src={user?.avatar || 'https://randomuser.me/api/portraits/women/65.jpg'} className="h-24 w-24 rounded-full mx-auto" alt="avatar" />
+						<h1 className="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">{user?.name || 'Your Name'}</h1>
+						<p className="text-sm text-gray-600 dark:text-gray-400">{user?.bio || 'Add a short bio in Edit Profile'}</p>
+						<p className="mt-1 text-sm text-gray-500">{user?.location || 'Somewhere'} · <a href={user?.website || '#'} className="text-primary-600 hover:text-primary-700">{user?.website || 'your.site'}</a></p>
+						<Link href="/edit-profile" className="inline-block mt-4 h-10 px-4 rounded-xl bg-gray-100 dark:bg-slate-800 text-sm font-medium text-gray-700 dark:text-gray-200">Edit Profile</Link>
 					</div>
 
 					{/* Tabs */}
