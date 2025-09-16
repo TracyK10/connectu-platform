@@ -17,7 +17,11 @@ const Footer = () => {
         <div className="flex flex-col items-center justify-between md:flex-row">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
             <div className="flex items-center justify-center w-8 h-8 text-white rounded-md bg-primary-600">
-              <span className="font-bold">CU</span>
+              <img
+              src="/images/icons/Vector - 0.svg"
+              alt="ConnectU Logo"
+              className="w-6 h-6"
+            />
             </div>
             <span className="text-lg font-bold text-primary-600">ConnectU</span>
           </div>
