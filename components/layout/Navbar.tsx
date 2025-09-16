@@ -46,7 +46,11 @@ const Navbar = () => {
         {/* Left: Logo */}
         <Link href="/home" className="flex items-center space-x-2">
           <div className="flex items-center justify-center w-8 h-8 text-white rounded-md bg-primary-600">
-            <span className="text-sm font-bold">CU</span>
+            <img
+              src="/images/icons/Vector - 0.svg"
+              alt="ConnectU Logo"
+              className="w-6 h-6"
+            />
           </div>
           <span className="text-lg font-semibold text-gray-900 dark:text-white">ConnectU</span>
         </Link>
