@@ -1,16 +1,15 @@
-import type { GetServerSideProps } from 'next';
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-	// SSR cannot access localStorage; rely on a cookie flag if present later.
-	// For now, always send to /home; client layout will re-route to /login if needed.
-	return {
-		redirect: {
-			destination: '/home',
-			permanent: false,
-		},
-	};
-};
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Index() {
+	const router = useRouter();
+	const { user, initialized } = useAuth();
+
+	useEffect(() => {
+		if (!initialized) return;
+		router.replace(user ? '/home' : '/login');
+	}, [user, initialized, router]);
+
 	return null;
 }

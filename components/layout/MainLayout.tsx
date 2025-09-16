@@ -30,6 +30,8 @@ export default function MainLayout({
 		}
 	}, [user, initialized, publicPage, router]);
 
+	const isLoading = !initialized;
+
 	return (
 		<div className={`min-h-screen flex flex-col ${className ?? ''}`}>
 			<Head>
@@ -38,13 +40,17 @@ export default function MainLayout({
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 
-			{!publicPage && <Navbar />}
+			{!publicPage && !isLoading && <Navbar />}
 			
 			<main className="flex-grow">
-				{children}
+				{isLoading ? (
+					<div className="flex items-center justify-center h-[60vh]"><div className="h-5 w-5 rounded-full border-2 border-gray-300 border-t-primary-600 animate-spin" /></div>
+				) : (
+					children
+				)}
 			</main>
 			
-			{!publicPage && <Footer />}
+			{!publicPage && !isLoading && <Footer />}
 		</div>
 	);
 }
