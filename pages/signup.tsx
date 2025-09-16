@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FiMail, FiLock, FiUser, FiArrowLeft } from 'react-icons/fi';
+import { FiMail, FiLock, FiUser } from 'react-icons/fi';
 import MainLayout from '../components/layout/MainLayout';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Signup() {
   const router = useRouter();
+  const { signup } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -29,13 +31,12 @@ export default function Signup() {
       return;
     }
     setIsLoading(true);
-    console.log('Signup form submitted:', formData);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await signup(formData.name, formData.email, formData.password);
     router.push('/home');
   };
 
   return (
-    <MainLayout title="Create your ConnectU account" className="bg-gray-50 dark:bg-slate-900">
+    <MainLayout title="Create your ConnectU account" className="bg-gray-50 dark:bg-slate-900" publicPage>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto py-16">
           <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-white mb-8">Sign up</h1>

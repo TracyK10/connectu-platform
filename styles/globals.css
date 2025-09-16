@@ -81,6 +81,11 @@
   @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white;
 }
 
+/* Specific tweak: inputs with leading icons need extra left padding */
+input.input, input[role="input"], .input.leading-icon {
+  @apply pl-10;
+}
+
 /* Animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }

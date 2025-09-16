@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FiMail, FiLock } from 'react-icons/fi';
 import MainLayout from '../components/layout/MainLayout';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Login() {
   const router = useRouter();
+  const { login, user, initialized } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -23,13 +25,12 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log('Login form submitted:', formData);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await login(formData.email, formData.password);
     router.push('/home');
   };
 
   return (
-    <MainLayout title="Log in to ConnectU" className="bg-gray-50 dark:bg-slate-900">
+    <MainLayout title="Log in to ConnectU" className="bg-gray-50 dark:bg-slate-900" publicPage>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto py-16">
           <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-white mb-8">Log in to ConnectU</h1>
