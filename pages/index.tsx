@@ -1,15 +1,17 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useAuth } from '@/contexts/AuthContext';
+import { getAccessToken } from '../lib/auth-tokens';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Index() {
 	const router = useRouter();
-	const { user, initialized } = useAuth();
+	const { initialized } = useAuth();
 
 	useEffect(() => {
 		if (!initialized) return;
-		router.replace(user ? '/home' : '/login');
-	}, [user, initialized, router]);
+		const token = getAccessToken();
+		router.replace(token ? '/home' : '/login');
+	}, [initialized, router]);
 
 	return null;
 }

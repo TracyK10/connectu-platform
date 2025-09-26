@@ -1,0 +1,10 @@
+# Example: replace with your existing operations
+# query GetFeed($limit: Int = 20) {
+#   feed(limit: $limit) {
+#     id
+#     content
+#     image
+#     createdAt
+#     author { id name avatar }
+#   }
+# }

@@ -3,6 +3,8 @@ import MainLayout from '../components/layout/MainLayout';
 import CreatePost from '../components/CreatePost';
 import PostCard from '../components/Post';
 import { useRouter } from 'next/router';
+import PostsList from '@/components/PostsList';
+import Profile from '@/components/Profile';
 
 interface Post {
   id: string;
@@ -75,6 +77,8 @@ export default function Home() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto space-y-4">
           <CreatePost onSubmit={handlePostSubmit} />
+          <PostsList />
+          <Profile />
           {posts.map((post) => (
             <div key={post.id} onClick={() => router.push(`/posts/${post.id}`)} className="cursor-pointer">
               <PostCard post={{
