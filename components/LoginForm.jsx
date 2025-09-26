@@ -14,66 +14,35 @@ const LOGIN_MUTATION = gql`
 	}
 `;
 
-// Some backends expect email instead of username; try this as a fallback if needed
-const LOGIN_BY_EMAIL_MUTATION = gql`
-	mutation LoginByEmail($email: String!, $password: String!) {
-		tokenAuth(email: $email, password: $password) {
-			success
-			errors
-			token
-			refreshToken
-		}
-	}
-`;
-
 export default function LoginForm() {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [serverError, setServerError] = useState('');
-	const [doLogin, { loading, error, client }] = useMutation(LOGIN_BY_EMAIL_MUTATION, {
-		onCompleted: async (data) => {
-			// Try email first
-			const resEmail = data?.tokenAuth;
-			if (resEmail?.success && resEmail?.token) {
-				saveTokens(resEmail.token, resEmail.refreshToken);
+	const [doLogin, { loading, error }] = useMutation(LOGIN_MUTATION, {
+		errorPolicy: 'all',
+		onCompleted: (data) => {
+			const res = data?.tokenAuth;
+			if (res?.success && res?.token) {
+				saveTokens(res.token, res.refreshToken);
 				if (typeof window !== 'undefined') window.location.href = '/home';
 				return;
 			}
-
-			// Fallback: try username param if email variant failed
-			try {
-				const attempt = await client.mutate({
-					mutation: LOGIN_MUTATION,
-					variables: { username, password },
-				});
-				const resUser = attempt?.data?.tokenAuth;
-				if (resUser?.success && resUser?.token) {
-					saveTokens(resUser.token, resUser.refreshToken);
-					if (typeof window !== 'undefined') window.location.href = '/home';
-					return;
-				}
-				const msg2 = typeof resUser?.errors === 'string' ? resUser.errors : 'Invalid credentials or inactive account.';
-				setServerError(msg2);
-			} catch (e) {
-				setServerError(e.message || 'Login failed');
-			}
+			const msg = typeof res?.errors === 'string' ? res.errors : 'Invalid credentials or account not active.';
+			setServerError(msg);
 		},
-		onError: (e) => {
-			setServerError(e.message || 'Login failed');
-		},
+		onError: (e) => setServerError(e.message || 'Login failed'),
 	});
 
 	const onSubmit = async (e) => {
 		e.preventDefault();
 		setServerError('');
-		await doLogin({ variables: { email: username, password } });
+		await doLogin({ variables: { username, password } });
 	};
-
 	return (
 		<form onSubmit={onSubmit} className="space-y-3">
 			<div>
 				<label className="block text-sm">Email or Username</label>
-				<input value={username} onChange={(e) => setUsername(e.target.value)} className="input h-11" placeholder="you@example.com or username" />
+				<input value={username} onChange={(e) => setUsername(e.target.value)} className="input h-11" placeholder="your email or username" />
 			</div>
 			<div>
 				<label className="block text-sm">Password</label>

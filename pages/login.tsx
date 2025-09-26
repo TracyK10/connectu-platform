@@ -4,7 +4,20 @@ import { useRouter } from 'next/router';
 import { FiMail, FiLock } from 'react-icons/fi';
 import MainLayout from '../components/layout/MainLayout';
 import { useAuth } from '../contexts/AuthContext';
-import LoginForm from '../components/LoginForm';
+import { gql } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
+import { saveTokens } from '../lib/auth-tokens';
+
+const LOGIN_MUTATION = gql`
+  mutation Login($username: String!, $password: String!) {
+    tokenAuth(username: $username, password: $password) {
+      success
+      errors
+      token
+      refreshToken
+    }
+  }
+`;
 
 export default function Login() {
   const router = useRouter();
@@ -13,6 +26,26 @@ export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+  });
+  const [serverError, setServerError] = useState('');
+
+  const [doLogin] = useMutation(LOGIN_MUTATION, {
+    errorPolicy: 'all',
+    onCompleted: (data: any) => {
+      const res = data?.tokenAuth;
+      if (res?.success && res?.token) {
+        saveTokens(res.token, res.refreshToken);
+        router.push('/home');
+        return;
+      }
+      const msg = typeof res?.errors === 'string' ? res.errors : 'Invalid credentials or account not active.';
+      setServerError(msg);
+      setIsLoading(false);
+    },
+    onError: (e: any) => {
+      setServerError(e.message || 'Login failed');
+      setIsLoading(false);
+    },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,9 +58,9 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setServerError('');
     setIsLoading(true);
-    await login(formData.email, formData.password);
-    router.push('/home');
+    await doLogin({ variables: { username: formData.email, password: formData.password } });
   };
 
   return (
@@ -36,11 +69,7 @@ export default function Login() {
         <div className="max-w-md mx-auto py-16">
           <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-white mb-8">Log in to ConnectU</h1>
           <div className="p-8 space-y-6 bg-white rounded-xl border border-gray-200 dark:bg-slate-900 dark:border-slate-800">
-            {/* Apollo-backed login that saves access/refresh tokens */}
-            <LoginForm />
-
-            {/* Optional legacy form (kept for email/password UI parity, not used for tokens) */}
-            {/*
+            {/* GraphQL-backed login that saves access/refresh tokens */}
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="email-address" className="sr-only">Email address</label>
@@ -80,6 +109,9 @@ export default function Login() {
                   />
                 </div>
               </div>
+              {serverError && (
+                <div className="text-red-600 text-sm" role="alert">{serverError}</div>
+              )}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -88,10 +120,9 @@ export default function Login() {
                 {isLoading ? 'Signing in...' : 'Log in'}
               </button>
             </form>
-            */}
 
             <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-              Don&apos;t have an account? <Link href="/signup" className="text-primary-600 hover:text-primary-700">Sign up</Link>
+              Don't have an account? <Link href="/signup" className="text-primary-600 hover:text-primary-700">Sign up</Link>
             </p>
           </div>
         </div>

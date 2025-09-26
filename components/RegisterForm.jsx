@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { gql } from '@apollo/client';
 import { useMutation } from '@apollo/client/react';
 import { saveTokens } from '../lib/auth-tokens';
+import { FiMail, FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
 // Registration mutation per backend guide
 const REGISTER_MUTATION = gql`
@@ -21,8 +22,11 @@ export default function RegisterForm() {
   const [password1, setPassword1] = useState('');
   const [password2, setPassword2] = useState('');
   const [serverError, setServerError] = useState('');
+  const [showPwd1, setShowPwd1] = useState(false);
+  const [showPwd2, setShowPwd2] = useState(false);
 
   const [doRegister, { loading, error }] = useMutation(REGISTER_MUTATION, {
+    errorPolicy: 'all',
     onCompleted: (data) => {
       const res = data?.register;
       const ok = res?.success;
@@ -34,19 +38,34 @@ export default function RegisterForm() {
         if (at) saveTokens(at, rt);
         if (typeof window !== 'undefined') {
           // If token was issued, go home; else ask user to log in
-          window.location.href = at ? '/home' : '/login';
+          window.location.assign(at ? '/home' : '/login');
         }
       } else {
-        const msg = typeof res?.errors === 'string' ? res.errors : 'Registration failed. Please check inputs or verify email.';
-        setServerError(msg);
+        // Attempt to extract a human-readable message from nested errors
+        let msg = 'Registration failed. Please check inputs or verify email.';
+        if (typeof res?.errors === 'string') {
+          msg = res.errors;
+        } else if (res?.errors && typeof res.errors === 'object') {
+          try {
+            const firstKey = Object.keys(res.errors)[0];
+            const firstVal = res.errors[firstKey];
+            if (Array.isArray(firstVal)) msg = firstVal[0];
+            else if (typeof firstVal === 'string') msg = firstVal;
+          } catch {}
+        }
+        setServerError(String(msg));
       }
     },
-    onError: (e) => setServerError(e.message || 'Registration failed'),
+    onError: (e) => setServerError(String(e?.message || 'Registration failed')),
   });
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setServerError('');
+    if (password1 !== password2) {
+      setServerError("Passwords don't match.");
+      return;
+    }
     await doRegister({ variables: { email, username, password1, password2 } });
   };
 
@@ -54,22 +73,50 @@ export default function RegisterForm() {
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
         <label className="block text-sm">Email</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input h-11 w-full" placeholder="you@example.com" required />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <FiMail className="w-5 h-5 text-gray-400" />
+          </div>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input h-11 w-full pl-10" placeholder="you@example.com" required />
+        </div>
       </div>
       <div>
         <label className="block text-sm">Username</label>
-        <input value={username} onChange={(e) => setUsername(e.target.value)} className="input h-11 w-full" placeholder="username" required />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <FiUser className="w-5 h-5 text-gray-400" />
+          </div>
+          <input value={username} onChange={(e) => setUsername(e.target.value)} className="input h-11 w-full pl-10" placeholder="username" required />
+        </div>
       </div>
       <div>
         <label className="block text-sm">Password</label>
-        <input type="password" value={password1} onChange={(e) => setPassword1(e.target.value)} className="input h-11 w-full" placeholder="Password" required />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <FiLock className="w-5 h-5 text-gray-400" />
+          </div>
+          <input type={showPwd1 ? 'text' : 'password'} value={password1} onChange={(e) => setPassword1(e.target.value)} className="input h-11 w-full pl-10 pr-10" placeholder="Password" required />
+          <button type="button" onClick={() => setShowPwd1((v) => !v)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
+            {showPwd1 ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
       <div>
         <label className="block text-sm">Confirm Password</label>
-        <input type="password" value={password2} onChange={(e) => setPassword2(e.target.value)} className="input h-11 w-full" placeholder="Confirm password" required />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <FiLock className="w-5 h-5 text-gray-400" />
+          </div>
+          <input type={showPwd2 ? 'text' : 'password'} value={password2} onChange={(e) => setPassword2(e.target.value)} className="input h-11 w-full pl-10 pr-10" placeholder="Confirm password" required />
+          <button type="button" onClick={() => setShowPwd2((v) => !v)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
+            {showPwd2 ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
-      <button type="submit" disabled={loading} className="btn btn-primary">{loading ? 'Creating account…' : 'Sign up'}</button>
-      {(error || serverError) && <div className="text-red-600 text-sm">{serverError || 'Registration failed'}</div>}
+      {serverError && <div className="text-red-600 text-sm" role="alert">{serverError}</div>}
+      <button type="submit" disabled={loading} className="w-full h-11 rounded-full text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed">
+        {loading ? 'Creating account…' : 'Sign up'}
+      </button>
     </form>
   );
 }
