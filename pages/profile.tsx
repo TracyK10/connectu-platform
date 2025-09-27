@@ -19,7 +19,8 @@ export default function Profile() {
 		}
 	`;
 
-	const { data, loading, error } = useQuery(ME_QUERY, {
+	type Me = { id: string; username: string; email: string; isActive: boolean; dateJoined: string };
+	const { data, loading, error } = useQuery<{ me: Me }>(ME_QUERY, {
 		fetchPolicy: 'network-only',
 		skip: !token,
 		ssr: false,
