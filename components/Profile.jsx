@@ -22,6 +22,7 @@ export default function Profile() {
 		ssr: false,
 	});
 
+	
 	if (!token) return <div className="p-4 text-sm text-gray-500">Please log in to view profile.</div>;
 	if (loading) return <div className="p-4 text-sm text-gray-500">Loading profile…</div>;
 	if (error) return <div className="p-4 text-sm text-red-600">Not authenticated or failed to load profile</div>;
