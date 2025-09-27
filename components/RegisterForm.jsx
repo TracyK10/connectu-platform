@@ -149,6 +149,9 @@ export default function RegisterForm() {
           </button>
         </div>
       </div>
+      <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
+        For your security, use a strong password: at least 12 characters, with one uppercase letter, one number, and one special character.
+      </p>
       {serverError && <div className="text-red-600 text-sm" role="alert">{serverError}</div>}
       <button type="submit" disabled={loading} className="w-full h-11 rounded-full text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed">
         {loading ? 'Creating account…' : 'Sign up'}

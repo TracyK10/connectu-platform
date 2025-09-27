@@ -91,7 +91,6 @@ export default function Login() {
                 </div>
               </div>
               <div>
-                <label htmlFor="password" className="sr-only">Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <FiLock className="w-5 h-5 text-gray-400" />
@@ -109,15 +108,17 @@ export default function Login() {
                   />
                 </div>
               </div>
-              {serverError && (
-                <div className="text-red-600 text-sm" role="alert">{serverError}</div>
-              )}
+              <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
+                For your security, use a strong password: at least 12 characters, with one uppercase letter, one number, and one special character.
+              </p>
+            {serverError && (
+              <div className="text-red-600 text-sm" role="alert">{serverError}</div>
+            )}
               <button
                 type="submit"
                 disabled={isLoading}
                 className={`w-full h-11 rounded-full text-sm font-medium text-white ${isLoading ? 'bg-primary-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'}`}
               >
-                {isLoading ? 'Signing in...' : 'Log in'}
               </button>
             </form>
 
