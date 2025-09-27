@@ -4,8 +4,8 @@ import { useMutation } from '@apollo/client/react';
 import { saveTokens } from '../lib/auth-tokens';
 
 const LOGIN_MUTATION = gql`
-	mutation Login($username: String!, $password: String!) {
-		tokenAuth(username: $username, password: $password) {
+	mutation Login($email: String!, $password: String!) {
+		tokenAuth(email: $email, password: $password) {
 			success
 			errors
 			token
@@ -15,7 +15,7 @@ const LOGIN_MUTATION = gql`
 `;
 
 export default function LoginForm() {
-	const [username, setUsername] = useState('');
+	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [serverError, setServerError] = useState('');
 	const [doLogin, { loading, error }] = useMutation(LOGIN_MUTATION, {
@@ -36,13 +36,13 @@ export default function LoginForm() {
 	const onSubmit = async (e) => {
 		e.preventDefault();
 		setServerError('');
-		await doLogin({ variables: { username, password } });
+		await doLogin({ variables: { email, password } });
 	};
 	return (
 		<form onSubmit={onSubmit} className="space-y-3">
 			<div>
-				<label className="block text-sm">Email or Username</label>
-				<input value={username} onChange={(e) => setUsername(e.target.value)} className="input h-11" placeholder="your email or username" />
+				<label className="block text-sm">Email or email</label>
+				<input value={email} onChange={(e) => setEmail(e.target.value)} className="input h-11" placeholder="your email or email" />
 			</div>
 			<div>
 				<label className="block text-sm">Password</label>

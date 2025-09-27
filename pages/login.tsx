@@ -9,8 +9,8 @@ import { useMutation } from '@apollo/client/react';
 import { saveTokens } from '../lib/auth-tokens';
 
 const LOGIN_MUTATION = gql`
-  mutation Login($username: String!, $password: String!) {
-    tokenAuth(username: $username, password: $password) {
+  mutation Login($email: String!, $password: String!) {
+    tokenAuth(email: $email, password: $password) {
       success
       errors
       token
@@ -60,7 +60,7 @@ export default function Login() {
     e.preventDefault();
     setServerError('');
     setIsLoading(true);
-    await doLogin({ variables: { username: formData.email, password: formData.password } });
+    await doLogin({ variables: { email: formData.email, password: formData.password } });
   };
 
   return (

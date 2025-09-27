@@ -16,7 +16,11 @@ const ME_QUERY = gql`
 
 export default function Profile() {
 	const token = getAccessToken();
-	const { data, loading, error } = useQuery(ME_QUERY, { fetchPolicy: 'cache-first', skip: !token });
+	const { data, loading, error } = useQuery(ME_QUERY, {
+		fetchPolicy: 'network-only',
+		skip: !token,
+		ssr: false,
+	});
 
 	if (!token) return <div className="p-4 text-sm text-gray-500">Please log in to view profile.</div>;
 	if (loading) return <div className="p-4 text-sm text-gray-500">Loading profile…</div>;

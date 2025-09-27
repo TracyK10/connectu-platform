@@ -17,7 +17,11 @@ const POSTS_QUERY = gql`
 
 export default function PostsList() {
 	const token = getAccessToken();
-	const { data, loading, error } = useQuery(POSTS_QUERY, { fetchPolicy: 'cache-and-network', skip: !token });
+	const { data, loading, error } = useQuery(POSTS_QUERY, {
+		fetchPolicy: 'network-only',
+		skip: !token,
+		ssr: false,
+	});
 
 	if (!token) return <div className="p-4 text-sm text-gray-500">Please log in to view posts.</div>;
 	if (loading) return <div className="p-4 text-sm text-gray-500">Loading posts…</div>;

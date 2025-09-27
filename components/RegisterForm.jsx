@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { gql } from '@apollo/client';
-import { useMutation } from '@apollo/client/react';
+import { useMutation, useApolloClient } from '@apollo/client/react';
 import { saveTokens } from '../lib/auth-tokens';
 import { FiMail, FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
@@ -8,6 +8,17 @@ import { FiMail, FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 const REGISTER_MUTATION = gql`
   mutation Register($email: String!, $username: String!, $password1: String!, $password2: String!) {
     register(email: $email, username: $username, password1: $password1, password2: $password2) {
+      success
+      errors
+      token
+      refreshToken
+    }
+  }
+`;
+
+const LOGIN_MUTATION = gql`
+  mutation Login($username: String!, $password: String!) {
+    tokenAuth(username: $username, password: $password) {
       success
       errors
       token
@@ -24,6 +35,7 @@ export default function RegisterForm() {
   const [serverError, setServerError] = useState('');
   const [showPwd1, setShowPwd1] = useState(false);
   const [showPwd2, setShowPwd2] = useState(false);
+  const apollo = useApolloClient();
 
   const [doRegister, { loading, error }] = useMutation(REGISTER_MUTATION, {
     errorPolicy: 'all',
@@ -37,8 +49,32 @@ export default function RegisterForm() {
         // If backend returns tokens on register, save them; else redirect to login
         if (at) saveTokens(at, rt);
         if (typeof window !== 'undefined') {
-          // If token was issued, go home; else ask user to log in
-          window.location.assign(at ? '/home' : '/login');
+          if (at) {
+            window.location.assign('/home');
+            return;
+          }
+          // If no token came back, try to auto-login using the entered credentials
+          (async () => {
+            try {
+              const attempts = [
+                { username: email, password: password1 },
+                { username: username, password: password1 },
+              ];
+              for (const vars of attempts) {
+                const resLogin = await apollo.mutate({ mutation: LOGIN_MUTATION, variables: vars, errorPolicy: 'all' });
+                const auth = resLogin?.data?.tokenAuth;
+                if (auth?.success && auth?.token) {
+                  saveTokens(auth.token, auth.refreshToken);
+                  window.location.assign('/home');
+                  return;
+                }
+              }
+              // Fallback: go to login if auto-login did not succeed
+              window.location.assign('/login');
+            } catch {
+              window.location.assign('/login');
+            }
+          })();
         }
       } else {
         // Attempt to extract a human-readable message from nested errors

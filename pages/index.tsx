@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { getAccessToken } from '../lib/auth-tokens';
+import { getAccessToken, getRefreshToken } from '../lib/auth-tokens';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Index() {
@@ -9,8 +9,14 @@ export default function Index() {
 
 	useEffect(() => {
 		if (!initialized) return;
-		const token = getAccessToken();
-		router.replace(token ? '/home' : '/login');
+		// Defer router navigation to avoid racing with token writes
+		const id = setTimeout(() => {
+			const at = getAccessToken();
+			const rt = getRefreshToken();
+			const target = at || rt ? '/home' : '/login';
+			router.replace(target);
+		}, 0);
+		return () => clearTimeout(id);
 	}, [initialized, router]);
 
 	return null;

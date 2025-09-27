@@ -23,7 +23,8 @@ const REFRESH_MUTATION = gql`
   }
 `;
 
-const httpLink = new HttpLink({ uri: GRAPHQL_URI, credentials: 'include' });
+// Cross-origin requests to Render should not include cookies by default to avoid CSRF 403s
+const httpLink = new HttpLink({ uri: GRAPHQL_URI, credentials: 'omit' });
 
 // Attach JWT token
 const authLink = new ApolloLink((operation, forward) => {
@@ -34,6 +35,12 @@ const authLink = new ApolloLink((operation, forward) => {
       ...(token ? { Authorization: `JWT ${token}` } : {}),
     },
   }));
+  if (typeof window !== 'undefined') {
+    const present = !!token;
+    const tail = token ? token.slice(-8) : '';
+    // eslint-disable-next-line no-console
+    console.debug('[Apollo] auth header set:', present ? `JWT ...${tail}` : 'none');
+  }
   return forward(operation);
 });
 
@@ -52,7 +59,13 @@ const refreshLink = new ApolloLink((operation, forward) => {
             (networkOrGraphQLError as any)?.networkError?.status ||
             (networkOrGraphQLError as any)?.response?.status;
 
-          const shouldTryRefresh = (status === 401 || status === 403) && !retried;
+          if (typeof window !== 'undefined') {
+            // eslint-disable-next-line no-console
+            console.warn('[Apollo] network error status:', status);
+          }
+
+          // Only attempt refresh when explicitly unauthorized; avoid treating 403 (e.g., CSRF) as token expiry
+          const shouldTryRefresh = status === 401 && !retried;
           if (!shouldTryRefresh) {
             observer.error(networkOrGraphQLError);
             return;
@@ -89,8 +102,12 @@ const refreshLink = new ApolloLink((operation, forward) => {
             }));
             processNext();
           } catch (e) {
-            clearTokens();
-            if (typeof window !== 'undefined') window.location.href = '/login';
+            // Do NOT auto-clear tokens or redirect here; it causes snap-back loops.
+            // Surface the error and let the UI decide how to handle auth failures.
+            if (typeof window !== 'undefined') {
+              // eslint-disable-next-line no-console
+              console.error('[Apollo] refresh token failed:', e);
+            }
             observer.error(networkOrGraphQLError);
           }
         },
