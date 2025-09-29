@@ -1,4 +1,5 @@
 import MainLayout from '../components/layout/MainLayout';
+import Image from 'next/image';
 
 interface ConversationItem {
 	id: string;
@@ -40,7 +41,15 @@ export default function Messages() {
 						{conversations.map((c) => (
 							<li key={c.id} className="flex items-center justify-between px-4 py-4">
 								<div className="flex items-center gap-3">
-									<img src={c.avatar} alt={c.name} className="h-10 w-10 rounded-full object-cover" />
+									<div className="relative h-10 w-10 flex-shrink-0">
+								<Image 
+									src={c.avatar} 
+									alt={c.name} 
+									fill
+									className="rounded-full object-cover"
+									sizes="40px"
+								/>
+							</div>
 									<div>
 										<p className="text-sm font-medium text-gray-900 dark:text-white">{c.name}</p>
 										<p className="text-sm text-gray-500 dark:text-gray-400">{c.message}</p>

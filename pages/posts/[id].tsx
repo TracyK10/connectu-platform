@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import MainLayout from '../../components/layout/MainLayout';
 
 export default function PostDetail() {
@@ -28,13 +29,30 @@ export default function PostDetail() {
 				<div className="max-w-2xl mx-auto py-6 space-y-4">
 					<div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-4">
 						<div className="flex items-start gap-3">
-							<img src={post.user.avatar} className="h-11 w-11 rounded-full" alt={post.user.name} />
+							<div className="relative h-11 w-11 flex-shrink-0">
+								<Image 
+									src={post.user.avatar} 
+									alt={post.user.name} 
+									fill
+									className="rounded-full object-cover"
+									sizes="44px"
+								/>
+							</div>
 							<div className="flex-1">
 								<p className="text-sm font-semibold text-gray-900 dark:text-white">{post.user.name}</p>
 								<p className="text-xs text-gray-500">{post.timeAgo}</p>
 								<p className="mt-2 text-sm text-gray-800 dark:text-gray-200">{post.content}</p>
 								<div className="mt-3 overflow-hidden rounded-xl">
-									<img src={post.image} className="w-full h-auto object-cover" alt="post" />
+									<div className="relative w-full h-96">
+									<Image 
+										src={post.image} 
+										alt="post" 
+										fill
+										className="object-cover"
+										sizes="(max-width: 768px) 100vw, 50vw"
+										priority
+									/>
+								</div>
 								</div>
 								<div className="mt-3 grid grid-cols-3 text-sm text-gray-600">
 									<button className="py-2 rounded-lg hover:bg-gray-100">❤ {post.likes}</button>

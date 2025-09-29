@@ -1,4 +1,5 @@
 import MainLayout from '../components/layout/MainLayout';
+import Image from 'next/image';
 
 interface MessageItem {
 	id: string;
@@ -29,7 +30,15 @@ export default function Chat() {
 					<h1 className="sr-only">Chat</h1>
 					<div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 h-[70vh] flex flex-col">
 						<div className="p-4 border-b border-gray-200 dark:border-slate-800 flex items-center gap-3">
-							<img src="https://randomuser.me/api/portraits/women/65.jpg" className="h-9 w-9 rounded-full" alt="Olivia" />
+							<div className="relative h-9 w-9 flex-shrink-0">
+							<Image 
+								src="https://randomuser.me/api/portraits/women/65.jpg" 
+								alt="Olivia" 
+								fill
+								className="rounded-full object-cover"
+								sizes="36px"
+							/>
+						</div>
 							<div>
 								<p className="text-sm font-medium text-gray-900 dark:text-white">Olivia</p>
 								<p className="text-xs text-gray-500">Today</p>

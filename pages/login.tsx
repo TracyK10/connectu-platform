@@ -29,9 +29,18 @@ export default function Login() {
   });
   const [serverError, setServerError] = useState('');
 
-  const [doLogin] = useMutation(LOGIN_MUTATION, {
+  interface TokenAuthResponse {
+    tokenAuth?: {
+      success: boolean;
+      errors?: string | Record<string, unknown>;
+      token?: string;
+      refreshToken?: string;
+    };
+  }
+
+  const [doLogin] = useMutation<{ tokenAuth: TokenAuthResponse['tokenAuth'] }>(LOGIN_MUTATION, {
     errorPolicy: 'all',
-    onCompleted: (data: any) => {
+    onCompleted: (data: TokenAuthResponse) => {
       const res = data?.tokenAuth;
       if (res?.success && res?.token) {
         saveTokens(res.token, res.refreshToken);
@@ -42,7 +51,7 @@ export default function Login() {
       setServerError(msg);
       setIsLoading(false);
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       setServerError(e.message || 'Login failed');
       setIsLoading(false);
     },
@@ -123,7 +132,7 @@ export default function Login() {
             </form>
 
             <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account? <Link href="/signup" className="text-primary-600 hover:text-primary-700">Sign up</Link>
+              Don&apos;t have an account? <Link href="/signup" className="text-primary-600 hover:text-primary-700">Sign up</Link>
             </p>
           </div>
         </div>

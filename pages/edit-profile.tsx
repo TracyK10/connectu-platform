@@ -2,6 +2,7 @@ import MainLayout from '../components/layout/MainLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import Image from 'next/image';
 
 export default function EditProfile() {
 	const { user, updateProfile } = useAuth();
@@ -24,7 +25,15 @@ export default function EditProfile() {
 					<h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-10">Edit profile</h1>
 					<div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-8">
 						<div className="flex flex-col items-center">
-							<img src={user?.avatar || 'https://randomuser.me/api/portraits/women/65.jpg'} className="h-24 w-24 rounded-full" alt="avatar" />
+							<div className="relative h-24 w-24">
+							<Image 
+								src={user?.avatar || 'https://randomuser.me/api/portraits/women/65.jpg'} 
+								alt="avatar" 
+								fill
+								className="rounded-full object-cover"
+								sizes="96px"
+							/>
+						</div>
 							<h2 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">{user?.name || 'Your Name'}</h2>
 							<p className="text-sm text-gray-500">@{user?.email?.split('@')[0] || 'you'}</p>
 						</div>

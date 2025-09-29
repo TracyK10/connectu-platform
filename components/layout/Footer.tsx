@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Image from 'next/image';
+import { FaGithub, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -7,7 +9,6 @@ const Footer = () => {
     { name: 'About', href: '/about' },
     { name: 'Privacy', href: '/privacy' },
     { name: 'Terms', href: '/terms' },
-    { name: 'Help', href: '/help' },
     { name: 'Contact', href: '/contact' },
   ];
 
@@ -17,10 +18,12 @@ const Footer = () => {
         <div className="flex flex-col items-center justify-between md:flex-row">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
             <div className="flex items-center justify-center w-8 h-8 text-white rounded-md bg-primary-600">
-              <img
-              src="/images/icons/Vector - 0.svg"
-              alt="ConnectU Logo"
-              className="w-6 h-6"
+              <Image
+                src="/images/icons/Vector - 0.svg"
+                alt="ConnectU Logo"
+                width={24}
+                height={24}
+                className="w-6 h-6"
             />
             </div>
             <span className="text-lg font-bold text-primary-600">ConnectU</span>

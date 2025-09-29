@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { FiHome, FiCompass, FiMessageSquare, FiBell, FiSearch } from 'react-icons/fi';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,9 +47,11 @@ const Navbar = () => {
         {/* Left: Logo */}
         <Link href="/home" className="flex items-center space-x-2">
           <div className="flex items-center justify-center w-8 h-8 text-white rounded-md bg-primary-600">
-            <img
+            <Image
               src="/images/icons/Vector - 0.svg"
               alt="ConnectU Logo"
+              width={24}
+              height={24}
               className="w-6 h-6"
             />
           </div>

@@ -1,5 +1,6 @@
 import MainLayout from '../components/layout/MainLayout';
 import Link from 'next/link';
+import Image from 'next/image';
 import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { getAccessToken } from '@/lib/auth-tokens';
@@ -44,7 +45,15 @@ export default function Profile() {
 				<div className="max-w-4xl mx-auto py-6">
 					{/* Header */}
 					<div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6 text-center">
-						<img src={'https://randomuser.me/api/portraits/women/65.jpg'} className="h-24 w-24 rounded-full mx-auto" alt="avatar" />
+						<div className="relative h-24 w-24 mx-auto">
+							<Image 
+								src="https://randomuser.me/api/portraits/women/65.jpg" 
+								alt="avatar" 
+								fill
+								className="rounded-full object-cover"
+								sizes="96px"
+							/>
+						</div>
 						<h1 className="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">{me?.username || 'Your Username'}</h1>
 						<p className="text-sm text-gray-600 dark:text-gray-400">{me?.email || 'you@example.com'}</p>
 						<p className="mt-1 text-sm text-gray-500">{me ? (me.isActive ? 'Active account' : 'Inactive account') : '—'} · Joined {me?.dateJoined ? new Date(me.dateJoined).toLocaleDateString() : '—'}</p>
@@ -71,7 +80,13 @@ export default function Profile() {
 					<div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
 						{photos.map((src, i) => (
 							<div key={i} className="aspect-square overflow-hidden rounded-xl bg-gray-100 dark:bg-slate-800">
-								<img src={src} alt="photo" className="w-full h-full object-cover" />
+								<Image 
+								src={src} 
+								alt="photo" 
+								fill
+								className="object-cover"
+								sizes="(max-width: 640px) 50vw, 33vw"
+							/>
 							</div>
 						))}
 					</div>

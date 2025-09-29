@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
+import { FiImage, FiX, FiSmile } from 'react-icons/fi';
 import Image from 'next/image';
-import { FaImage } from 'react-icons/fa';
 
 interface CreatePostPayload {
   content: string;
@@ -56,13 +56,20 @@ export default function CreatePost({ onSubmit }: CreatePostProps) {
           />
           {imagePreview && (
             <div className="mt-3 overflow-hidden rounded-xl border border-gray-200 dark:border-slate-800">
-              <img src={imagePreview} alt="preview" className="w-full h-auto object-cover" />
+              <Image 
+                src={imagePreview} 
+                alt="preview" 
+                width={800}
+                height={600}
+                className="w-full h-auto object-cover"
+                unoptimized={imagePreview.startsWith('blob:')}
+              />
             </div>
           )}
           <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <label className="inline-flex items-center justify-center w-10 h-10 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer">
-                <FaImage className="h-5 w-5" />
+                <FiImage className="h-5 w-5" />
                 <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
               </label>
             </div>

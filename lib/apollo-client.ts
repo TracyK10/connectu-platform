@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache, HttpLink, ApolloLink, from, Observable, gql } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
-import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from './auth-tokens';
+import { getAccessToken, getRefreshToken, saveTokens } from './auth-tokens';
 
 // Allow overriding the GraphQL endpoint via env; fall back to common defaults
 const GRAPHQL_URI =
@@ -9,7 +9,6 @@ const GRAPHQL_URI =
 
 if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_GRAPHQL_URL) {
   // Surface a hint in the console so misconfigured endpoints are obvious during dev
-  // eslint-disable-next-line no-console
   console.warn('[Apollo] Using default GRAPHQL_URI (deployed):', GRAPHQL_URI, '(set NEXT_PUBLIC_GRAPHQL_URL to override)');
 }
 
@@ -38,7 +37,6 @@ const authLink = new ApolloLink((operation, forward) => {
   if (typeof window !== 'undefined') {
     const present = !!token;
     const tail = token ? token.slice(-8) : '';
-    // eslint-disable-next-line no-console
     console.debug('[Apollo] auth header set:', present ? `JWT ...${tail}` : 'none');
   }
   return forward(operation);
@@ -47,17 +45,21 @@ const authLink = new ApolloLink((operation, forward) => {
 // Refresh logic
 const refreshLink = new ApolloLink((operation, forward) => {
   return new Observable((observer) => {
-    let sub: any;
+    let sub: { unsubscribe: () => void } | null = null;
     let retried = false;
 
     const processNext = () => {
       sub = forward(operation).subscribe({
         next: (result) => observer.next(result),
-        error: async (networkOrGraphQLError) => {
+        error: async (networkOrGraphQLError: Error & {
+          statusCode?: number;
+          networkError?: { status?: number };
+          response?: { status?: number };
+        }) => {
           const status =
-            (networkOrGraphQLError as any)?.statusCode ||
-            (networkOrGraphQLError as any)?.networkError?.status ||
-            (networkOrGraphQLError as any)?.response?.status;
+            networkOrGraphQLError.statusCode ||
+            networkOrGraphQLError.networkError?.status ||
+            networkOrGraphQLError.response?.status;
 
           if (typeof window !== 'undefined') {
             // eslint-disable-next-line no-console
@@ -87,7 +89,13 @@ const refreshLink = new ApolloLink((operation, forward) => {
               variables: { refreshToken: rt },
             });
 
-            const refreshed: any = data || {};
+            interface RefreshTokenResponse {
+              refreshToken?: {
+                token: string;
+                payload: unknown;
+              };
+            }
+            const refreshed = (data || {}) as RefreshTokenResponse;
             const newAccess = refreshed?.refreshToken?.token;
             const newRefresh = undefined; // backend doesn't return a new refresh token; keep existing
 
@@ -123,8 +131,28 @@ const refreshLink = new ApolloLink((operation, forward) => {
   });
 });
 
-const errorLink = onError((error: any) => {
-  const { graphQLErrors, networkError, operation } = error as any;
+interface GraphQLError {
+  message: string;
+  locations?: Array<{ line: number; column: number }>;
+  path?: string[];
+  extensions?: Record<string, unknown>;
+}
+
+interface ErrorResponse {
+  graphQLErrors?: ReadonlyArray<GraphQLError>;
+  networkError?: Error & {
+    statusCode?: number;
+    bodyText?: string;
+    response?: Response;
+    result?: Record<string, unknown>;
+  };
+  operation?: {
+    operationName?: string;
+  };
+}
+
+const errorLink = onError((error: ErrorResponse) => {
+  const { graphQLErrors, networkError, operation } = error;
   if (graphQLErrors) {
     for (const err of graphQLErrors) {
       console.error(`[GraphQL error] in ${operation?.operationName || 'anonymous'}:`, err);
