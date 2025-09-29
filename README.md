@@ -19,7 +19,7 @@ A modern, responsive social media feed application built with React and GraphQL.
 - **Routing**: React Router
 - **Testing**: Jest & React Testing Library
 
-## 📦 Prerequisites
+## 📦 Prerequisites 
 
 - Node.js (v16 or later)
 - npm or yarn
