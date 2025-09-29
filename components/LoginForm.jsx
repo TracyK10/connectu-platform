@@ -48,7 +48,7 @@ export default function LoginForm() {
 				<label className="block text-sm">Password</label>
 				<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input h-11" placeholder="password" />
 			</div>
-			<button type="submit" disabled={loading} className="btn btn-primary">{loading ? 'Logging in…' : 'Log in'}</button>
+			<button type="submit" disabled={loading} className="btn btn-primary text-white">{loading ? 'Logging in…' : 'Log in'}</button>
 			{(error || serverError) && <div className="text-red-600 text-sm">{serverError || 'Login failed'}</div>}
 		</form>
 	);
